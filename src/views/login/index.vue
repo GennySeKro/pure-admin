@@ -6,12 +6,15 @@ import { loginRules } from "./utils/rule";
 import { useNav } from "@/layout/hooks/useNav";
 import type { FormInstance } from "element-plus";
 import { useLayout } from "@/layout/hooks/useLayout";
-import { useUserStoreHook } from "@/store/modules/user";
+// import { useUserStoreHook } from "@/store/modules/user";
 import { bg, avatar, illustration } from "./utils/static";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import { ref, reactive, toRaw, onMounted, onBeforeUnmount } from "vue";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
-import { initRouter } from "@/router/utils";
+// import { initRouter } from "@/router/utils";
+
+import { setToken } from "@/utils/auth";
+import { usePermissionStoreHook } from "@/store/modules/permission";
 
 import dayIcon from "@/assets/svg/day.svg?component";
 import darkIcon from "@/assets/svg/dark.svg?component";
@@ -42,17 +45,26 @@ const onLogin = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   await formEl.validate((valid, fields) => {
     if (valid) {
-      useUserStoreHook()
-        .loginByUsername({ username: ruleForm.username, password: "admin123" })
-        .then(res => {
-          if (res.success) {
-            // 获取后端路由
-            initRouter().then(() => {
-              router.push("/");
-              message("登录成功", { type: "success" });
-            });
-          }
-        });
+      // useUserStoreHook()
+      //   .loginByUsername({ username: ruleForm.username, password: "admin123" })
+      //   .then(res => {
+      //     if (res.success) {
+      //       // 获取后端路由
+      //       initRouter().then(() => {
+      //         router.push("/");
+      //         message("登录成功", { type: "success" });
+      //       });
+      //     }
+      //   });
+      // 全部采取静态路由模式
+      usePermissionStoreHook().handleWholeMenus([]);
+      setToken({
+        username: "admin",
+        roles: ["admin"],
+        accessToken: "eyJhbGciOiJIUzUxMiJ9.admin"
+      } as any);
+      router.push("/");
+      message("登录成功", { type: "success" });
     } else {
       loading.value = false;
       return fields;
@@ -78,7 +90,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="select-none">
-    <img :src="bg" class="wave" />
+    <img :src="bg" class="wave" alt="图像不存在" />
     <div class="flex-c absolute right-5 top-3">
       <!-- 主题 -->
       <el-switch
